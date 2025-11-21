@@ -1,5 +1,5 @@
-#include "NeuroGen/cuda/HomeostaticMechanismsKernel.cuh"
-#include "NeuroGen/cuda/NeuronModelConstants.h"
+#include <engine/HomeostaticMechanismsKernel.cuh>
+#include <engine/NeuronModelConstants.h>
 
 // --- Kernel for Synaptic Scaling ---
 __global__ void synapticScalingKernel(

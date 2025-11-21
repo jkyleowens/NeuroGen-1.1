@@ -1,5 +1,5 @@
-#include "NeuroGen/cuda/HebbianLearningKernel.cuh"
-#include "NeuroGen/cuda/GPUNeuralStructures.h"
+#include <engine/HebbianLearningKernel.cuh>
+#include <engine/GPUNeuralStructures.h>
 
 // ============================================================================
 // HEBBIAN LEARNING KERNEL IMPLEMENTATIONS

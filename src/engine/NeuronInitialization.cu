@@ -1,5 +1,5 @@
-#include "NeuroGen/cuda/NeuronInitialization.cuh"
-#include "NeuroGen/cuda/NeuronModelConstants.h"
+#include <engine/NeuronInitialization.cuh>
+#include <engine/NeuronModelConstants.h>
 
 // --- Kernel to initialize all state variables for every neuron ---
 __global__ void neuronInitializationKernel(GPUNeuronState* neurons, int num_neurons) {

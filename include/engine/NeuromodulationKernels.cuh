@@ -1,7 +1,7 @@
 #ifndef NEUROMODULATION_KERNELS_CUH
 #define NEUROMODULATION_KERNELS_CUH
 
-#include <NeuroGen/cuda/GPUNeuralStructures.h>
+#include "GPUNeuralStructures.h"
 
 /**
  * @brief Modulates the intrinsic excitability of neurons based on neuromodulator levels.

@@ -1,12 +1,14 @@
-#include "NeuroGen/cuda/KernelLaunchWrappers.cuh"
+#include <engine/KernelLaunchWrappers.cuh>
 
 // Include all the necessary kernel headers
-#include "NeuroGen/cuda/IonChannelInitialization.cuh"
-#include "NeuroGen/cuda/NeuronUpdateKernel.cuh"
-#include "NeuroGen/cuda/CalciumDiffusionKernel.cuh"
-#include "NeuroGen/cuda/EnhancedSTDPKernel.cuh"
-#include "NeuroGen/cuda/EligibilityAndRewardKernels.cuh"
-#include "NeuroGen/cuda/HomeostaticMechanismsKernel.cuh"
+#include <engine/IonChannelInitialization.cuh>
+#include <engine/NeuronUpdateKernel.cuh>
+#include <engine/CalciumDiffusionKernel.cuh>
+#include <engine/EnhancedSTDPKernel.cuh>
+#include <engine/EligibilityAndRewardKernels.cuh>
+#include <engine/HomeostaticMechanismsKernel.cuh>
+#include <engine/NeuronOutputKernel.cuh>
+#include <engine/FusedKernels.cuh>
 
 #include <iostream>
 #include <cuda_runtime.h>
@@ -41,11 +43,9 @@ namespace KernelLaunchWrappers {
 // (Other wrapper implementations remain the same)
 void initialize_ion_channels(GPUNeuronState* neurons, int num_neurons) {
     const int num_blocks = (num_neurons + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK;
-    std::cout << "[CUDA] Launching ionChannelInitializationKernel with " << num_blocks << " blocks..." << std::endl;
     ionChannelInitializationKernel<<<num_blocks, THREADS_PER_BLOCK>>>(neurons, num_neurons);
     CUDA_CHECK_LAST_ERROR();
     CUDA_CHECK_ERROR(cudaDeviceSynchronize());
-    std::cout << "[CUDA] ionChannelInitializationKernel completed successfully" << std::endl;
 }
 
 void update_neuron_states(GPUNeuronState* neurons, float current_time, float dt, int num_neurons) {
@@ -60,23 +60,17 @@ void update_neuron_states(GPUNeuronState* neurons, float current_time, float dt,
     }
     
     const int num_blocks = (num_neurons + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK;
-    std::cout << "[CUDA] Launching neuronUpdateKernel with " << num_blocks << " blocks..." << std::endl;
-    std::cout << "[CUDA]   neurons=" << neurons << ", current_time=" << current_time 
-              << ", dt=" << dt << ", num_neurons=" << num_neurons << std::endl;
     
     neuronUpdateKernel<<<num_blocks, THREADS_PER_BLOCK>>>(neurons, current_time, dt, num_neurons);
     CUDA_CHECK_LAST_ERROR();
     CUDA_CHECK_ERROR(cudaDeviceSynchronize());
-    std::cout << "[CUDA] neuronUpdateKernel completed successfully" << std::endl;
 }
 
 void update_calcium_dynamics(GPUNeuronState* neurons, float current_time, float dt, int num_neurons) {
     const int num_blocks = (num_neurons + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK;
-    std::cout << "[CUDA] Launching calciumDiffusionKernel with " << num_blocks << " blocks..." << std::endl;
     calciumDiffusionKernel<<<num_blocks, THREADS_PER_BLOCK>>>(neurons, current_time, dt, num_neurons);
     CUDA_CHECK_LAST_ERROR();
     CUDA_CHECK_ERROR(cudaDeviceSynchronize());
-    std::cout << "[CUDA] calciumDiffusionKernel completed successfully" << std::endl;
 }
 
 void run_stdp_and_eligibility(
@@ -87,11 +81,9 @@ void run_stdp_and_eligibility(
     int num_synapses)
 {
     const int num_blocks = (num_synapses + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK;
-    std::cout << "[CUDA] Launching enhancedSTDPKernel with " << num_blocks << " blocks..." << std::endl;
     enhancedSTDPKernel<<<num_blocks, THREADS_PER_BLOCK>>>(synapses, neurons, current_time, dt, num_synapses);
     CUDA_CHECK_LAST_ERROR();
     CUDA_CHECK_ERROR(cudaDeviceSynchronize());
-    std::cout << "[CUDA] enhancedSTDPKernel completed successfully" << std::endl;
 }
 
 void apply_reward_and_adaptation(
@@ -103,17 +95,13 @@ void apply_reward_and_adaptation(
     int num_synapses)
 {
     const int num_blocks = (num_synapses + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK;
-    std::cout << "[CUDA] Launching applyRewardKernel with " << num_blocks << " blocks..." << std::endl;
     applyRewardKernel<<<num_blocks, THREADS_PER_BLOCK>>>(synapses, reward, dt, num_synapses);
     CUDA_CHECK_LAST_ERROR();
     CUDA_CHECK_ERROR(cudaDeviceSynchronize());
-    std::cout << "[CUDA] applyRewardKernel completed successfully" << std::endl;
     
-    std::cout << "[CUDA] Launching adaptNeuromodulationKernel with " << num_blocks << " blocks..." << std::endl;
     adaptNeuromodulationKernel<<<num_blocks, THREADS_PER_BLOCK>>>(synapses, neurons, reward, num_synapses, current_time);
     CUDA_CHECK_LAST_ERROR();
     CUDA_CHECK_ERROR(cudaDeviceSynchronize());
-    std::cout << "[CUDA] adaptNeuromodulationKernel completed successfully" << std::endl;
 }
 
 
@@ -127,18 +115,127 @@ void run_homeostatic_mechanisms(
 {
     const int neuron_blocks = (num_neurons + THREADS_PER_BLOCK - 1) / THREADS_PER_BLOCK;
 
-    std::cout << "[CUDA] Launching synapticScalingKernel with " << neuron_blocks << " blocks..." << std::endl;
     // The kernel call now has the correct number of arguments.
     synapticScalingKernel<<<neuron_blocks, THREADS_PER_BLOCK>>>(neurons, synapses, num_neurons, num_synapses, current_time);
     CUDA_CHECK_LAST_ERROR();
     CUDA_CHECK_ERROR(cudaDeviceSynchronize());
-    std::cout << "[CUDA] synapticScalingKernel completed successfully" << std::endl;
     
-    std::cout << "[CUDA] Launching intrinsicPlasticityKernel with " << neuron_blocks << " blocks..." << std::endl;
     intrinsicPlasticityKernel<<<neuron_blocks, THREADS_PER_BLOCK>>>(neurons, num_neurons);
     CUDA_CHECK_LAST_ERROR();
     CUDA_CHECK_ERROR(cudaDeviceSynchronize());
-    std::cout << "[CUDA] intrinsicPlasticityKernel completed successfully" << std::endl;
+}
+
+void compute_neuron_outputs(
+    const GPUNeuronState* neurons,
+    float* output_buffer,
+    int* output_counts,
+    int num_neurons,
+    int num_outputs,
+    int group_size)
+{
+    if (!neurons || !output_buffer || !output_counts) {
+        std::cerr << "[CUDA ERROR] Invalid pointers in compute_neuron_outputs" << std::endl;
+        return;
+    }
+    if (num_neurons <= 0 || num_outputs <= 0) {
+        std::cerr << "[CUDA ERROR] Invalid sizes in compute_neuron_outputs" << std::endl;
+        return;
+    }
+
+    CUDA_CHECK_ERROR(cudaMemset(output_buffer, 0, num_outputs * sizeof(float)));
+    CUDA_CHECK_ERROR(cudaMemset(output_counts, 0, num_outputs * sizeof(int)));
+
+    const int threads = THREADS_PER_BLOCK;
+    int neuron_blocks = (num_neurons + threads - 1) / threads;
+    accumulateNeuronOutputsKernel<<<neuron_blocks, threads>>>(
+        neurons,
+        output_buffer,
+        output_counts,
+        num_neurons,
+        group_size,
+        num_outputs);
+    CUDA_CHECK_LAST_ERROR();
+    CUDA_CHECK_ERROR(cudaDeviceSynchronize());
+
+    int output_blocks = (num_outputs + threads - 1) / threads;
+    finalizeNeuronOutputsKernel<<<output_blocks, threads>>>(
+        output_buffer,
+        output_counts,
+        num_outputs);
+    CUDA_CHECK_LAST_ERROR();
+    CUDA_CHECK_ERROR(cudaDeviceSynchronize());
+}
+
+// ============================================================================
+// FUSED KERNEL WRAPPERS (SoA OPTIMIZED)
+// ============================================================================
+
+void launch_fused_neuron_update(
+    NeuronArrays* d_neuron_arrays,
+    float current_time,
+    float dt,
+    float dopamine_level,
+    float serotonin_level,
+    int num_neurons)
+{
+    if (!d_neuron_arrays || num_neurons <= 0) {
+        std::cerr << "[CUDA ERROR] Invalid parameters in launch_fused_neuron_update" << std::endl;
+        return;
+    }
+    
+    // Copy structure from device to get array pointers
+    NeuronArrays h_arrays;
+    CUDA_CHECK_ERROR(cudaMemcpy(&h_arrays, d_neuron_arrays, sizeof(NeuronArrays), cudaMemcpyDeviceToHost));
+    
+    const int threads = THREADS_PER_BLOCK;
+    int blocks = (num_neurons + threads - 1) / threads;
+    
+    fusedNeuronUpdateKernel<<<blocks, threads>>>(
+        h_arrays,
+        current_time,
+        dt,
+        dopamine_level,
+        serotonin_level,
+        num_neurons
+    );
+    
+    CUDA_CHECK_LAST_ERROR();
+    // Note: We don't synchronize here for async execution
+}
+
+void launch_fused_plasticity(
+    SynapseArrays* d_synapse_arrays,
+    NeuronArrays* d_neuron_arrays,
+    float reward_signal,
+    float current_time,
+    float dt,
+    int num_synapses)
+{
+    if (!d_synapse_arrays || !d_neuron_arrays || num_synapses <= 0) {
+        std::cerr << "[CUDA ERROR] Invalid parameters in launch_fused_plasticity" << std::endl;
+        return;
+    }
+    
+    // Copy structures from device to get array pointers
+    SynapseArrays h_syn_arrays;
+    NeuronArrays h_neu_arrays;
+    CUDA_CHECK_ERROR(cudaMemcpy(&h_syn_arrays, d_synapse_arrays, sizeof(SynapseArrays), cudaMemcpyDeviceToHost));
+    CUDA_CHECK_ERROR(cudaMemcpy(&h_neu_arrays, d_neuron_arrays, sizeof(NeuronArrays), cudaMemcpyDeviceToHost));
+    
+    const int threads = THREADS_PER_BLOCK;
+    int blocks = (num_synapses + threads - 1) / threads;
+    
+    fusedPlasticityKernel<<<blocks, threads>>>(
+        h_syn_arrays,
+        h_neu_arrays,
+        reward_signal,
+        current_time,
+        dt,
+        num_synapses
+    );
+    
+    CUDA_CHECK_LAST_ERROR();
+    // Note: We don't synchronize here for async execution
 }
 
 } // namespace KernelLaunchWrappers

@@ -1,7 +1,7 @@
 #ifndef KERNEL_LAUNCH_WRAPPERS_CUH
 #define KERNEL_LAUNCH_WRAPPERS_CUH
 
-#include "NeuroGen/cuda/GPUNeuralStructures.h"
+#include "GPUNeuralStructures.h"
 #include <cuda_runtime.h>
 
 // Forward declarations for modular architecture support
@@ -39,6 +39,24 @@ void initialize_ion_channels(GPUNeuronState* neurons, int num_neurons);
 void update_neuron_states(GPUNeuronState* neurons, float current_time, float dt, int num_neurons);
 
 /**
+ * @brief Fused neuron update (SoA version) - combines update, calcium, neuromodulation
+ * @param neuron_arrays Device pointer to neuron SoA structure
+ * @param current_time Current simulation time (ms)
+ * @param dt Time step (ms)
+ * @param dopamine_level Global dopamine concentration
+ * @param serotonin_level Global serotonin concentration
+ * @param num_neurons Total number of neurons
+ */
+void launch_fused_neuron_update(
+    NeuronArrays* neuron_arrays,
+    float current_time,
+    float dt,
+    float dopamine_level,
+    float serotonin_level,
+    int num_neurons
+);
+
+/**
  * @brief Update calcium dynamics for plasticity mechanisms
  * @param neurons Device pointer to neuron array
  * @param current_time Current simulation time (ms)
@@ -58,6 +76,24 @@ void update_calcium_dynamics(GPUNeuronState* neurons, float current_time, float 
 void run_stdp_and_eligibility(
     GPUSynapse* synapses,
     const GPUNeuronState* neurons,
+    float current_time,
+    float dt,
+    int num_synapses
+);
+
+/**
+ * @brief Fused plasticity kernel (SoA version) - combines STDP, eligibility, reward
+ * @param synapse_arrays Device pointer to synapse SoA structure
+ * @param neuron_arrays Device pointer to neuron SoA structure
+ * @param reward_signal Reward prediction error
+ * @param current_time Current simulation time (ms)
+ * @param dt Time step (ms)
+ * @param num_synapses Total number of synapses
+ */
+void launch_fused_plasticity(
+    SynapseArrays* synapse_arrays,
+    NeuronArrays* neuron_arrays,
+    float reward_signal,
     float current_time,
     float dt,
     int num_synapses
@@ -96,6 +132,24 @@ void run_homeostatic_mechanisms(
     int num_neurons,
     int num_synapses
 );
+
+/**
+ * @brief Compute compact neuron output groups directly on the GPU.
+ *
+ * @param neurons Device pointer to neuron array.
+ * @param output_buffer Device pointer that will hold averaged outputs.
+ * @param output_counts Device pointer for per-group counts (temporary).
+ * @param num_neurons Total number of neurons.
+ * @param num_outputs Total number of output groups.
+ * @param group_size Number of neurons mapped to each output group.
+ */
+void compute_neuron_outputs(
+    const GPUNeuronState* neurons,
+    float* output_buffer,
+    int* output_counts,
+    int num_neurons,
+    int num_outputs,
+    int group_size);
 
 // ============================================================================
 // MODULAR ARCHITECTURE SUPPORT KERNELS

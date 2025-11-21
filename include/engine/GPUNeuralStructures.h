@@ -1,7 +1,7 @@
 #ifndef GPU_NEURAL_STRUCTURES_H
 #define GPU_NEURAL_STRUCTURES_H
 
-#include "NeuroGen/NeuralConstants.h"
+#include <engine/NeuralConstants.h>
 
 // ============================================================================
 // COMPLETE GPU PLASTICITY STATE STRUCTURE - MISSING DEFINITION
@@ -250,6 +250,124 @@ struct GPUSynapse {
     int developmental_stage;            // Development stage
     float structural_stability;         // Resistance to pruning
     float growth_factor;                // Growth tendency
+};
+
+// ============================================================================
+// STRUCTURE OF ARRAYS (SoA) - OPTIMIZED FOR GPU COALESCING
+// ============================================================================
+
+/**
+ * @brief Structure of Arrays layout for neurons (optimized for GPU coalescing)
+ * 
+ * Benefits:
+ * - 2-3x memory bandwidth improvement from coalesced access
+ * - Better cache utilization
+ * - Reduced register pressure in kernels
+ */
+struct NeuronArrays {
+    // === CORE MEMBRANE DYNAMICS (hot path) ===
+    float* V;                           // Membrane potential (mV)
+    float* u;                           // Recovery variable (Izhikevich)
+    float* I_syn_0;                     // Synaptic current compartment 0
+    float* I_syn_1;                     // Synaptic current compartment 1
+    float* I_syn_2;                     // Synaptic current compartment 2
+    float* I_syn_3;                     // Synaptic current compartment 3
+    float* I_ext;                       // External current input
+    
+    // === CALCIUM DYNAMICS (hot path) ===
+    float* ca_conc_0;                   // Calcium concentration compartment 0
+    float* ca_conc_1;                   // Calcium concentration compartment 1
+    float* ca_conc_2;                   // Calcium concentration compartment 2
+    float* ca_conc_3;                   // Calcium concentration compartment 3
+    
+    // === TIMING (hot path) ===
+    float* last_spike_time;             // Time of last spike
+    float* previous_spike_time;         // Previous spike time
+    
+    // === ACTIVITY (medium frequency) ===
+    float* average_firing_rate;         // Running average firing rate
+    float* average_activity;            // Average activity level
+    float* activity_level;              // Current activity level
+    float* firing_rate;                 // Instantaneous firing rate
+    
+    // === PLASTICITY (medium frequency) ===
+    float* excitability;                // Intrinsic excitability
+    float* synaptic_scaling_factor;     // Global synaptic scaling
+    float* bcm_threshold;               // BCM learning threshold
+    float* plasticity_threshold;        // Plasticity induction threshold
+    float* threshold;                   // Firing threshold
+    
+    // === NEUROMODULATION (medium frequency) ===
+    float* dopamine_concentration;      // Local dopamine level
+    float* acetylcholine_level;         // Local acetylcholine level
+    float* serotonin_level;             // Local serotonin level
+    float* norepinephrine_level;        // Local norepinephrine level
+    
+    // === ION CHANNELS (cold path) ===
+    float* na_m;                        // Sodium channel activation
+    float* na_h;                        // Sodium channel inactivation
+    float* k_n;                         // Potassium channel state
+    float* ca_channel_state;            // Calcium channel state
+    
+    // === NETWORK PROPERTIES (cold path) ===
+    int* neuron_type;                   // Neuron type (excitatory/inhibitory)
+    int* layer_id;                      // Cortical layer
+    int* column_id;                     // Cortical column
+    int* active;                        // Activity flag
+    
+    // === METABOLISM (cold path) ===
+    float* energy_level;                // Cellular energy
+    float* metabolic_demand;            // Energy demand
+    
+    size_t num_neurons;                 // Total number of neurons
+};
+
+/**
+ * @brief Structure of Arrays layout for synapses (optimized for GPU coalescing)
+ */
+struct SynapseArrays {
+    // === CONNECTIVITY (hot path) ===
+    int* pre_neuron_idx;                // Presynaptic neuron index
+    int* post_neuron_idx;               // Postsynaptic neuron index
+    int* post_compartment;              // Target compartment
+    int* active;                        // Activity flag
+    
+    // === SYNAPTIC PROPERTIES (hot path) ===
+    float* weight;                      // Current weight
+    float* max_weight;                  // Maximum weight bound
+    float* min_weight;                  // Minimum weight bound
+    float* effective_weight;            // Modulated weight
+    
+    // === PLASTICITY (hot path) ===
+    float* eligibility_trace;           // Eligibility trace
+    float* learning_rate;               // Synapse-specific learning rate
+    
+    // === TIMING (hot path) ===
+    float* last_pre_spike_time;         // Last presynaptic spike
+    float* last_post_spike_time;        // Last postsynaptic spike
+    
+    // === NEUROMODULATION (medium frequency) ===
+    float* dopamine_sensitivity;        // Dopamine sensitivity
+    float* dopamine_level;              // Local dopamine
+    
+    // === SHORT-TERM PLASTICITY (medium frequency) ===
+    float* release_probability;         // Release probability
+    float* facilitation_factor;         // Short-term facilitation
+    float* depression_factor;           // Short-term depression
+    
+    // === CALCIUM DYNAMICS (medium frequency) ===
+    float* presynaptic_calcium;         // Pre-synaptic calcium
+    float* postsynaptic_calcium;        // Post-synaptic calcium
+    
+    // === OTHER PROPERTIES (cold path) ===
+    float* plasticity_modulation;       // Plasticity modulation
+    float* metaplasticity_factor;       // Meta-plasticity scaling
+    float* delay;                       // Synaptic delay
+    float* homeostatic_scaling;         // Homeostatic scaling
+    int* receptor_index;                // Receptor type
+    int* vesicle_count;                 // Available vesicles
+    
+    size_t num_synapses;                // Total number of synapses
 };
 
 // ============================================================================

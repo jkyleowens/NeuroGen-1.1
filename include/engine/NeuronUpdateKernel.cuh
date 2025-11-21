@@ -1,7 +1,7 @@
 #ifndef NEURON_UPDATE_KERNEL_CUH
 #define NEURON_UPDATE_KERNEL_CUH
 
-#include <NeuroGen/cuda/GPUNeuralStructures.h>
+#include "GPUNeuralStructures.h"
 
 /**
  * @brief Updates the state of each neuron for one time step using the Izhikevich model.

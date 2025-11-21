@@ -1,0 +1,191 @@
+# NeuroGen Modular Brain Architecture - Configuration File
+# Edit these parameters to customize the system behavior
+
+# =============================================================================
+# GPU Configuration
+# =============================================================================
+gpu_device_id=0                     # CUDA device to use
+enable_parallel_execution=true      # Use multiple CUDA streams
+time_step_ms=1.0                    # Simulation time step
+
+# =============================================================================
+# Brain Modules - Neuron Counts
+# =============================================================================
+thalamus_neurons=2048              # Sensory gatekeeper
+wernicke_neurons=16384             # Language comprehension (encoder)
+broca_neurons=16384                # Language production (decoder)
+hippocampus_neurons=8192           # Episodic memory
+pfc_neurons=32768                  # Executive control (largest)
+basal_ganglia_neurons=4096         # Action selection
+
+# Total: 79,872 neurons
+
+# =============================================================================
+# Learning Rates (per module)
+# =============================================================================
+thalamus_learning_rate=0.01
+wernicke_learning_rate=0.05        # High for semantic encoding
+broca_learning_rate=0.03
+hippocampus_learning_rate=0.15     # Very high (3-5x cortical)
+pfc_learning_rate=0.01             # Low for stability
+basal_ganglia_learning_rate=0.08   # Moderate for RL
+
+# =============================================================================
+# Neuromodulation Parameters
+# =============================================================================
+# Dopamine Sensitivity (0.0 - 2.0)
+thalamus_dopamine=0.3
+wernicke_dopamine=0.4
+broca_dopamine=0.5
+hippocampus_dopamine=0.6
+pfc_dopamine=0.5
+basal_ganglia_dopamine=1.0         # Very sensitive!
+
+# Serotonin Sensitivity (0.0 - 2.0)
+thalamus_serotonin=0.5
+wernicke_serotonin=0.3
+broca_serotonin=0.4
+hippocampus_serotonin=0.2
+pfc_serotonin=0.6
+basal_ganglia_serotonin=0.3
+
+# =============================================================================
+# Attention and Gating
+# =============================================================================
+thalamus_attention_threshold=0.5   # High threshold for input gating
+wernicke_attention_threshold=0.2
+broca_attention_threshold=0.3
+hippocampus_attention_threshold=0.15
+pfc_attention_threshold=0.25
+basal_ganglia_attention_threshold=0.2
+
+# Inhibition Levels (0.0 - 1.0)
+thalamus_inhibition=0.2
+wernicke_inhibition=0.1
+broca_inhibition=0.8               # High inhibition by default!
+hippocampus_inhibition=0.15
+pfc_inhibition=0.2
+basal_ganglia_inhibition=0.3
+
+# =============================================================================
+# Cognitive Cycle Timing (milliseconds)
+# =============================================================================
+sensation_duration=50.0            # 0-50ms
+perception_duration=100.0          # 50-150ms
+integration_duration=150.0         # 150-300ms
+selection_duration=100.0           # 300-400ms
+action_duration=100.0              # 400ms+
+
+# Total cycle: ~500ms (biologically realistic)
+
+# =============================================================================
+# Memory Consolidation
+# =============================================================================
+enable_consolidation=true
+consolidation_interval_ms=10000.0  # Every 10 seconds
+
+# =============================================================================
+# Token Embedding
+# =============================================================================
+vocab_size=10000                   # Vocabulary size
+embedding_dim=512                  # Embedding dimensionality
+use_random_init=true               # Random vs pretrained
+normalization=1.0                  # L2 normalization factor
+
+# =============================================================================
+# Output Decoder
+# =============================================================================
+output_dim=16384                   # Broca's output dimension
+temperature=1.0                    # Sampling temperature
+top_k=50                          # Top-k sampling parameter
+top_p=0.9                         # Nucleus sampling parameter
+beam_width=5                      # Beam search width
+sampling_strategy=top_p           # greedy|temperature|top_k|top_p|beam_search
+
+# =============================================================================
+# Training Configuration
+# =============================================================================
+max_epochs=10
+batch_size=8
+training_learning_rate=0.001
+sequence_length=32
+enable_validation=false
+validation_interval=100
+reward_discount=0.99
+
+# Data paths (leave empty for demo data)
+train_data_path=
+val_data_path=
+checkpoint_dir=./checkpoints
+
+# =============================================================================
+# Checkpointing / Persistence
+# =============================================================================
+save_binary_checkpoint=true         # Write .ngchk snapshots after each epoch
+checkpoint_extension=.ngchk         # Binary checkpoint file extension
+resume_checkpoint_path=             # Optional default checkpoint to load (or use --load flag)
+
+# =============================================================================
+# Inter-Module Connections
+# =============================================================================
+# Connection format: source->target, strength, excitatory(1)/inhibitory(0)
+
+# Sensory pathway
+connection_1=Thalamus->Wernicke,1.0,1,0.1,0.02
+
+# Semantic to working memory
+connection_2=Wernicke->PFC,0.8,1,0.05,0.03
+
+# Memory encoding
+connection_3=Wernicke->Hippocampus,0.9,1,0.05,0.05
+
+# Memory retrieval
+connection_4=Hippocampus->PFC,0.7,1,0.1,0.04
+
+# Executive to action
+connection_5=PFC->BasalGanglia,1.0,1,0.05,0.03
+
+# Action gating
+connection_6=BasalGanglia->Broca,0.5,1,0.2,0.02
+
+# Semantic to output
+connection_7=PFC->Broca,0.8,1,0.1,0.03
+
+# Top-down attention (inhibitory!)
+connection_8=PFC->Thalamus,0.6,0,0.1,0.02
+
+# Top-down modulation
+connection_9=PFC->Wernicke,0.5,1,0.1,0.02
+
+# Recurrent PFC (working memory)
+connection_10=PFC->PFC,0.7,1,0.05,0.01
+
+# =============================================================================
+# Performance Tuning
+# =============================================================================
+enable_gpu_memory_pool=true
+enable_graph_capture=false         # Experimental
+max_batch_parallel=8               # Max parallel batch processing
+
+# =============================================================================
+# Logging and Debugging
+# =============================================================================
+log_level=info                     # debug|info|warning|error
+print_module_stats=true
+print_connection_stats=false
+save_activity_logs=false
+activity_log_interval=1000         # Save every N steps
+
+# =============================================================================
+# Notes
+# =============================================================================
+# - Increase learning rates for faster convergence (less stable)
+# - Increase neuron counts for more capacity (more GPU memory)
+# - Decrease time_step_ms for finer-grained dynamics (slower)
+# - Adjust dopamine sensitivity to control reward-based learning
+# - High inhibition on Broca prevents premature output
+# - Hippocampus should have highest learning rate (3-5x cortical)
+# - PFC should have lowest learning rate (stability)
+# - Consolidation helps transfer knowledge from hippocampus to cortex
+# =============================================================================
+

@@ -1,6 +1,6 @@
 // File: src/cuda/LearningStateKernels.cu (NEW FILE)
 
-#include "NeuroGen/cuda/LearningStateKernels.cuh"
+#include <engine/LearningStateKernels.cuh>
 #include <cuda_runtime.h>
 #include <device_launch_parameters.h>
 #include <cub/cub.cuh>
@@ -41,6 +41,7 @@ __global__ void kernel_update_eligibility_traces(
     }
     
     // Apply reward modulation if significant reward
+    // Note: fabsf checks magnitude, but reward_signal itself preserves sign
     if (fabsf(reward_signal) > 0.01f) {
         float weight_change = learning_state->learning_rates[post_neuron] * reward_signal * current_trace;
         synapses[synapse_idx].weight += weight_change;
@@ -49,8 +50,9 @@ __global__ void kernel_update_eligibility_traces(
         synapses[synapse_idx].weight = fmaxf(-1.0f, fminf(1.0f, synapses[synapse_idx].weight));
     }
     
-    // Update eligibility trace
-    learning_state->eligibility_traces[synapse_idx] = fmaxf(0.0f, fminf(1.0f, current_trace));
+    // Update eligibility trace - PRESERVE SIGN for proper credit assignment
+    // Allow both positive and negative traces for LTP/LTD distinction
+    learning_state->eligibility_traces[synapse_idx] = fmaxf(-1.0f, fminf(1.0f, current_trace));
 }
 
 __global__ void kernel_apply_synaptic_tagging(

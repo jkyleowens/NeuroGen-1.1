@@ -1,5 +1,5 @@
-#include "NeuroGen/cuda/CalciumDiffusionKernel.cuh"
-#include "NeuroGen/cuda/NeuronModelConstants.h"
+#include <engine/CalciumDiffusionKernel.cuh>
+#include <engine/NeuronModelConstants.h>
 
 // Helper function to model the non-linear, voltage-dependent gating of NMDA receptors.
 __device__ inline float nmda_gating_factor(float V) {

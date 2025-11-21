@@ -1,7 +1,7 @@
 #ifndef HEBBIAN_LEARNING_KERNEL_CUH
 #define HEBBIAN_LEARNING_KERNEL_CUH
 
-#include "NeuroGen/cuda/GPUNeuralStructures.h"
+#include "GPUNeuralStructures.h"
 
 // ============================================================================
 // HEBBIAN LEARNING KERNEL DECLARATIONS

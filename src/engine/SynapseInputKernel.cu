@@ -1,6 +1,6 @@
-#include "NeuroGen/cuda/SynapseInputKernel.cuh"
-#include "NeuroGen/cuda/GPUNeuralStructures.h"
-#include "NeuroGen/cuda/NeuronModelConstants.h"
+#include <engine/SynapseInputKernel.cuh>
+#include <engine/GPUNeuralStructures.h>
+#include <engine/NeuronModelConstants.h>
 #include <cuda_runtime.h>
 #include <cmath>
 

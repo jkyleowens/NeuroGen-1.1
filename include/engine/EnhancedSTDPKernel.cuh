@@ -2,7 +2,7 @@
 #define ENHANCED_STDP_KERNEL_CUH
 
 // This header now correctly includes the necessary data structures.
-#include <NeuroGen/cuda/GPUNeuralStructures.h>
+#include "GPUNeuralStructures.h"
 
 /**
  * @brief Main kernel for multi-factor, biologically-inspired synaptic plasticity.

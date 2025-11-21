@@ -1,7 +1,7 @@
 #ifndef CALCIUM_DIFFUSION_KERNEL_CUH
 #define CALCIUM_DIFFUSION_KERNEL_CUH
 
-#include <NeuroGen/cuda/GPUNeuralStructures.h>
+#include "GPUNeuralStructures.h"
 
 /**
  * @brief Updates the calcium concentration in each neuron's dendritic compartments.

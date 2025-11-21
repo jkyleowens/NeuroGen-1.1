@@ -1,0 +1,11 @@
+{
+  "global_step": 0,
+  "tokens_processed": 0,
+  "total_loss": 0.0,
+  "avg_loss": 0,
+  "config": {
+    "vocab_size": 50257,
+    "embedding_dim": 512,
+    "max_seq_length": 512
+  }
+}

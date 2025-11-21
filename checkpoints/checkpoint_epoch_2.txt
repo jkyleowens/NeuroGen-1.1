@@ -1,0 +1,7 @@
+Epoch: 2
+Loss: 0
+Perplexity: 0
+Accuracy: 0
+Tokens: 0
+Sequences: 0
+Reward: 0

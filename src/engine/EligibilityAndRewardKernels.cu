@@ -1,5 +1,5 @@
-#include "NeuroGen/cuda/EligibilityAndRewardKernels.cuh"
-#include "NeuroGen/cuda/NeuronModelConstants.h"
+#include <engine/EligibilityAndRewardKernels.cuh>
+#include <engine/NeuronModelConstants.h>
 
 // --- Kernel to apply reward and consolidate weight changes ---
 __global__ void applyRewardKernel(

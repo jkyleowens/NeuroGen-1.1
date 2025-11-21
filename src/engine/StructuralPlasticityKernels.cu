@@ -1,6 +1,6 @@
-#include "NeuroGen/cuda/StructuralPlasticityKernels.cuh"
-#include "NeuroGen/cuda/NeuronModelConstants.h"
-#include "NeuroGen/cuda/GPUNeuralStructures.h"
+#include <engine/StructuralPlasticityKernels.cuh>
+#include <engine/NeuronModelConstants.h>
+#include <engine/GPUNeuralStructures.h>
 #include <curand_kernel.h>
 #include <cmath>
 

@@ -1,5 +1,5 @@
-#include "NeuroGen/cuda/RewardModulationKernel.cuh"
-#include "NeuroGen/cuda/GPUNeuralStructures.h"
+#include <engine/RewardModulationKernel.cuh>
+#include <engine/GPUNeuralStructures.h>
 
 // ============================================================================
 // REWARD MODULATION KERNEL IMPLEMENTATIONS

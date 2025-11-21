@@ -3,9 +3,9 @@
 // File: src/cuda/NeuronSpikingKernelWrappers.cu
 // ============================================================================
 
-#include "NeuroGen/cuda/NeuronSpikingKernels.cuh"
-#include "NeuroGen/cuda/GPUNeuralStructures.h"
-#include "NeuroGen/cuda/NeuronModelConstants.h"
+#include <engine/NeuronSpikingKernels.cuh>
+#include <engine/GPUNeuralStructures.h>
+#include <engine/NeuronModelConstants.h>
 #include <cuda_runtime.h>
 #include <cstdio>
 #include <vector>

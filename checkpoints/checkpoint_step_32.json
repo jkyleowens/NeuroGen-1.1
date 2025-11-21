@@ -1,0 +1,11 @@
+{
+  "global_step": 32,
+  "tokens_processed": 328796,
+  "total_loss": 346.39650184678584,
+  "avg_loss": 10.824890682712057,
+  "config": {
+    "vocab_size": 50257,
+    "embedding_dim": 512,
+    "max_seq_length": 512
+  }
+}

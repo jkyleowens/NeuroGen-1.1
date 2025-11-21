@@ -1,6 +1,6 @@
-#include "NeuroGen/cuda/NeuronSpikingKernels.cuh"
-#include "NeuroGen/cuda/GPUNeuralStructures.h"
-#include "NeuroGen/cuda/NeuronModelConstants.h"
+#include <engine/NeuronSpikingKernels.cuh>
+#include <engine/GPUNeuralStructures.h>
+#include <engine/NeuronModelConstants.h>
 #include <cuda_runtime.h>
 
 // Forward declaration of spike event structure for modular architecture

@@ -1,5 +1,5 @@
-#include <NeuroGen/cuda/RandomStateInit.cuh>
-#include <NeuroGen/cuda/GridBlockUtils.cuh>
+#include <engine/RandomStateInit.cuh>
+#include <engine/GridBlockUtils.cuh>
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
 

@@ -9,7 +9,7 @@
 #include <cstdio>
 
 // Include our GPU data structures
-#include <NeuroGen/cuda/GPUNeuralStructures.h>
+#include <engine/GPUNeuralStructures.h>
 
 // ============================================================================
 // ADDITIONAL STRUCTURES FOR ADVANCED LEARNING

@@ -3,14 +3,14 @@
 // File: src/cuda/EnhancedLearningSystem.cu
 // ============================================================================
 
-#include "NeuroGen/EnhancedLearningSystem.h"
-#include "NeuroGen/cuda/GPUNeuralStructures.h"
-#include "NeuroGen/cuda/EnhancedSTDPKernel.cuh"
-#include "NeuroGen/cuda/HebbianLearningKernel.cuh"
-#include "NeuroGen/cuda/HomeostaticMechanismsKernel.cuh"
-#include "NeuroGen/cuda/EligibilityAndRewardKernels.cuh"
-#include "NeuroGen/cuda/RewardModulationKernel.cuh"
-#include "NeuroGen/cuda/NeuromodulationKernels.cuh"
+#include <engine/EnhancedLearningSystem.h>
+#include <engine/GPUNeuralStructures.h>
+#include <engine/EnhancedSTDPKernel.cuh>
+#include <engine/HebbianLearningKernel.cuh>
+#include <engine/HomeostaticMechanismsKernel.cuh>
+#include <engine/EligibilityAndRewardKernels.cuh>
+#include <engine/RewardModulationKernel.cuh>
+#include <engine/NeuromodulationKernels.cuh>
 #include <cuda_runtime.h>
 #include <cstdio>
 #include <cmath>
@@ -118,6 +118,29 @@ void EnhancedLearningSystem::reset_eligibility_traces_gpu() {
     if (error != cudaSuccess) {
         printf("CUDA Error in eligibility reset: %s\n", cudaGetErrorString(error));
     }
+}
+
+// ============================================================================
+// MAIN LEARNING UPDATE
+// ============================================================================
+
+void EnhancedLearningSystem::update_learning(float current_time, float dt, float external_reward) {
+    if (!cuda_initialized_) {
+        return;
+    }
+    
+    // Update eligibility traces
+    launch_eligibility_reset_gpu();
+    
+    // Apply reward modulation to synapses
+    if (d_reward_signals_ptr_ && d_synapses_ptr_) {
+        // Simple reward application - in practice would use CUDA kernels
+        // For now, just track the reward
+        reward_signal_ = external_reward;
+    }
+    
+    // Update performance metrics
+    update_performance_metrics_gpu();
 }
 
 // ============================================================================

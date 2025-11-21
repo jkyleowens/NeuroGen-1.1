@@ -9,7 +9,7 @@
 #include <cstdio>
 
 // Include GPU structures (must be available in .cu compilation)
-#include <NeuroGen/cuda/GPUNeuralStructures.h>
+#include <engine/GPUNeuralStructures.h>
 
 // ============================================================================
 // CUDA KERNEL IMPLEMENTATIONS
@@ -61,20 +61,22 @@ __global__ void enhanced_stdp_kernel(
         float stdp_window = 20.0f; // 20ms STDP window
         float calcium_factor = post_neuron.ca_conc[0] / 1.0f; // Use first compartment calcium
         
-        if (fabsf(delta_t) < stdp_window) {
+        // Check if within STDP window (preserve sign for proper LTP/LTD direction)
+        if (delta_t < stdp_window && delta_t > -stdp_window) {
             float stdp_magnitude;
             
             if (delta_t > 0) {
-                // LTP: Post before pre (causal)
+                // LTP: Post after pre (causal) - positive magnitude
                 stdp_magnitude = __expf(-delta_t / 10.0f) * calcium_factor;
                 synapse.weight += stdp_magnitude * 0.01f * dt;
             } else {
-                // LTD: Pre before post (anti-causal)
-                stdp_magnitude = __expf(delta_t / 10.0f) * calcium_factor;
-                synapse.weight -= stdp_magnitude * 0.005f * dt;
+                // LTD: Pre before post (anti-causal) - negative magnitude
+                stdp_magnitude = -__expf(delta_t / 10.0f) * calcium_factor;
+                synapse.weight += stdp_magnitude * 0.005f * dt;  // Note: magnitude is negative
             }
             
-            // Update eligibility trace
+            // Update eligibility trace - PRESERVE SIGN for proper credit assignment
+            // Positive trace for LTP, negative for LTD
             synapse.eligibility_trace += stdp_magnitude * 0.1f;
         }
         

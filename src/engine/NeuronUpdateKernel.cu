@@ -1,5 +1,5 @@
-#include "NeuroGen/cuda/NeuronUpdateKernel.cuh"
-#include "NeuroGen/cuda/NeuronModelConstants.h"
+#include <engine/NeuronUpdateKernel.cuh>
+#include <engine/NeuronModelConstants.h>
 
 // --- Main kernel to update neuron states using the Izhikevich model ---
 __global__ void neuronUpdateKernel(GPUNeuronState* neurons, float current_time, float dt, int num_neurons) {

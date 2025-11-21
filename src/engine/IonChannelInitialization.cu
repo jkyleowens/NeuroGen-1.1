@@ -1,5 +1,5 @@
-#include "NeuroGen/cuda/IonChannelInitialization.cuh"
-#include "NeuroGen/cuda/NeuronModelConstants.h"
+#include <engine/IonChannelInitialization.cuh>
+#include <engine/NeuronModelConstants.h>
 
 // --- Kernel to initialize ion channel states and membrane potentials ---
 __global__ void ionChannelInitializationKernel(GPUNeuronState* neurons, int num_neurons) {

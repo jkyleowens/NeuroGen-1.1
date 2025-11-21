@@ -13,24 +13,24 @@
 #include <curand.h>
 
 // NeuroGen Framework includes
-#include "NeuroGen/Network.h"
-#include "NeuroGen/NetworkConfig.h"
-#include "NeuroGen/LearningState.h"
-#include "NeuroGen/cuda/GPUNeuralStructures.h"
-#include "NeuroGen/cuda/LearningStateKernels.cuh"
-#include "NeuroGen/cuda/KernelLaunchWrappers.cuh"
+#include "engine/Network.h"
+#include "engine/NetworkConfig.h"
+#include "engine/LearningState.h"
+#include "engine/GPUNeuralStructures.h"
+#include "engine/LearningStateKernels.cuh"
+#include "engine/KernelLaunchWrappers.cuh"
 
 // Forward declarations
-class BrainModuleArchitecture;
-class LearningStateManager;
+// Note: BrainOrchestrator is in modules/, not engine/
+// NetworkCUDA operates independently in the modular architecture
 
 /**
  * @brief GPU-accelerated neural network with persistent learning capabilities
  * 
  * This class provides CUDA-accelerated neural computation with full support for
  * persistent learning states, memory consolidation, inter-module learning,
- * and brain-inspired neural dynamics. It integrates seamlessly with the
- * BrainModuleArchitecture for modular neural processing.
+ * and brain-inspired neural dynamics. In the modular architecture, each
+ * CorticalModule contains its own NetworkCUDA instance.
  * 
  * Key Features:
  * - GPU-accelerated neural simulation with CUDA kernels
@@ -157,8 +157,10 @@ public:
      * @brief Initialize from existing neural network
      * @param network Existing Network instance to copy from
      * @return Success status
+     * 
+     * Note: This method is deprecated in the modular architecture
      */
-    bool initializeFromNetwork(const Network& network);
+    // bool initializeFromNetwork(const Network& network);
     
     /**
      * @brief Reinitialize with new configuration
@@ -181,26 +183,8 @@ public:
     std::map<std::string, std::string> getDeviceInfo() const;
     
     // ========================================================================
-    // BRAIN ARCHITECTURE INTEGRATION
+    // MODULAR ARCHITECTURE INTEGRATION
     // ========================================================================
-    
-    /**
-     * @brief Set brain architecture reference
-     * @param architecture Shared pointer to brain architecture
-     */
-    void setBrainArchitecture(std::shared_ptr<BrainModuleArchitecture> architecture);
-    
-    /**
-     * @brief Set learning state manager reference
-     * @param manager Shared pointer to learning state manager
-     */
-    void setLearningStateManager(std::shared_ptr<LearningStateManager> manager);
-    
-    /**
-     * @brief Synchronize with brain architecture state
-     * @param force_full_sync Force complete synchronization
-     */
-    void synchronizeWithArchitecture(bool force_full_sync = false);
     
     /**
      * @brief Get number of neurons for architecture sizing
@@ -215,10 +199,17 @@ public:
     size_t getNumSynapses() const { return num_synapses_; }
     
     /**
-     * @brief Update network topology from architecture
+     * @brief Copy inputs to GPU (for CorticalModule interface)
+     * @param inputs Input vector
      * @return Success status
      */
-    bool updateTopologyFromArchitecture();
+    bool copyInputsToGPU(const std::vector<float>& inputs);
+    
+    /**
+     * @brief Get neuron outputs (for CorticalModule interface)
+     * @return Output vector from neurons
+     */
+    std::vector<float> getNeuronOutputs() const;
     
     // ========================================================================
     // CORE NEURAL PROCESSING
@@ -261,6 +252,26 @@ public:
      * @return Vector of neuron membrane potentials
      */
     std::vector<GPUNeuronState> getNeuronStates() const;
+
+    /**
+     * @brief Get full synapse state buffer
+     * @return Vector of GPUSynapse structures
+     */
+    std::vector<GPUSynapse> getSynapseStates() const;
+
+    /**
+     * @brief Overwrite neuron states on the GPU
+     * @param neurons Host-side neuron buffer
+     * @return Success status
+     */
+    bool setNeuronStates(const std::vector<GPUNeuronState>& neurons);
+
+    /**
+     * @brief Overwrite synapse states on the GPU
+     * @param synapses Host-side synapse buffer
+     * @return Success status
+     */
+    bool setSynapseStates(const std::vector<GPUSynapse>& synapses);
 
     /**
      * @brief Get device pointer to neurons (for direct GPU access)
@@ -590,6 +601,13 @@ public:
      * @return True if state is valid
      */
     bool validateGPUState() const;
+    
+    /**
+     * @brief Calculate reward prediction error and global stats on CPU
+     * @param actual_reward Actual reward received
+     * @return Reward prediction error
+     */
+    float calculateRewardPredictionErrorCPU(float actual_reward);
 
 private:
     // ========================================================================
@@ -612,11 +630,22 @@ private:
     cublasHandle_t cublas_handle_ = nullptr;
     curandGenerator_t curand_generator_ = nullptr;
     
-    // Neural network GPU memory
+    // Neural network GPU memory (legacy AoS layout - for persistence compatibility)
     GPUNeuronState* d_neurons_ = nullptr;
     GPUSynapse* d_synapses_ = nullptr;
     float* d_inputs_ = nullptr;
     float* d_outputs_ = nullptr;
+    int* d_output_counts_ = nullptr;
+    
+    // SoA layout (optimized for computation)
+    NeuronArrays* d_neuron_arrays_ = nullptr;
+    SynapseArrays* d_synapse_arrays_ = nullptr;
+    
+    // Host copies of SoA structures (containing device pointers) to avoid D2H copies
+    NeuronArrays h_neuron_arrays_struct_;
+    SynapseArrays h_synapse_arrays_struct_;
+    
+    bool use_soa_layout_ = true;  // Use SoA by default for performance
     
     // Learning state GPU memory
     GPULearningState* d_learning_state_ = nullptr;
@@ -639,10 +668,10 @@ private:
     size_t num_inputs_ = 0;
     size_t num_outputs_ = 0;
     size_t num_modules_ = 0;
+    int output_group_size_ = 1;
     
-    // External references
-    std::shared_ptr<BrainModuleArchitecture> brain_architecture_;
-    std::shared_ptr<LearningStateManager> learning_state_manager_;
+    // External references (removed - NetworkCUDA operates independently in modular architecture)
+    // Each CorticalModule contains its own NetworkCUDA instance
     
     // Performance monitoring
     mutable CUDAPerformanceMetrics performance_metrics_;
@@ -660,7 +689,7 @@ private:
     bool memory_pool_enabled_ = false;
     
     // Thread safety
-    mutable std::mutex cuda_mutex_;
+    mutable std::recursive_mutex cuda_mutex_;
     mutable std::mutex memory_mutex_;
     mutable std::mutex stream_mutex_;
     
@@ -672,6 +701,12 @@ private:
     std::chrono::high_resolution_clock::time_point last_update_time_;
     std::vector<float> update_time_history_;
     float current_time_ = 0.0f;  // Simulation time in milliseconds
+    
+    // Reward prediction for CPU-based RPE calculation
+    float expected_reward_ = 0.0f;
+    float reward_history_sum_ = 0.0f;
+    int reward_history_count_ = 0;
+    static constexpr int MAX_REWARD_HISTORY = 1000;
     
     // ========================================================================
     // INTERNAL HELPER METHODS
@@ -712,6 +747,33 @@ private:
      * @return Success status
      */
     bool allocateWorkingBuffers();
+    
+    /**
+     * @brief Allocate SoA arrays for neurons
+     * @return Success status
+     */
+    bool allocateNeuronArrays();
+    
+    /**
+     * @brief Allocate SoA arrays for synapses
+     * @return Success status
+     */
+    bool allocateSynapseArrays();
+    
+    /**
+     * @brief Free SoA arrays
+     */
+    void freeSOAArrays();
+    
+    /**
+     * @brief Convert AoS to SoA layout
+     */
+    void convertAoSToSoA();
+    
+    /**
+     * @brief Convert SoA to AoS layout (for persistence)
+     */
+    void convertSoAToAoS();
     
     /**
      * @brief Initialize neural network data on GPU

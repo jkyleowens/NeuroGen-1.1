@@ -1,4 +1,4 @@
-#include <NeuroGen/cuda/NetworkCUDA_Interface.h>
+#include <engine/NetworkCUDA_Interface.h>
 #include <cuda_runtime.h>
 #include <iostream>
 

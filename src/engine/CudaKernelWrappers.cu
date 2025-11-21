@@ -1,10 +1,10 @@
 #include <cuda_runtime.h>
 #include <cstdio>
-#include "NeuroGen/cuda/GPUNeuralStructures.h"
-#include "NeuroGen/cuda/EnhancedSTDPKernel.cuh"
-#include "NeuroGen/cuda/HebbianLearningKernel.cuh"
-#include "NeuroGen/cuda/HomeostaticMechanismsKernel.cuh"
-#include "NeuroGen/cuda/NeuromodulationKernels.cuh"
+#include <engine/GPUNeuralStructures.h>
+#include <engine/EnhancedSTDPKernel.cuh>
+#include <engine/HebbianLearningKernel.cuh>
+#include <engine/HomeostaticMechanismsKernel.cuh>
+#include <engine/NeuromodulationKernels.cuh>
 
 extern "C" {
 

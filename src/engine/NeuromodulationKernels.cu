@@ -1,5 +1,5 @@
-#include "NeuroGen/cuda/NeuromodulationKernels.cuh"
-#include "NeuroGen/cuda/NeuronModelConstants.h"
+#include <engine/NeuromodulationKernels.cuh>
+#include <engine/NeuronModelConstants.h>
 
 // --- Kernel to modulate intrinsic neuron excitability ---
 __global__ void applyIntrinsicNeuromodulationKernel(

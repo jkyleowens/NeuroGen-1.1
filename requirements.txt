@@ -1,0 +1,22 @@
+# NeuroGen Modular Brain - Python Requirements
+# Install with: pip install -r requirements.txt
+
+# Core dependencies
+numpy>=1.21.0
+torch>=2.0.0
+
+# Dataset and tokenization
+datasets>=2.14.0
+transformers>=4.30.0
+zstandard>=0.21.0
+
+# Progress bars and utilities
+tqdm>=4.65.0
+
+# Python bindings (build system)
+pybind11>=2.10.0
+
+# Optional: For better performance
+# accelerate>=0.20.0
+# sentencepiece>=0.1.99
+

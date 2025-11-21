@@ -1,7 +1,7 @@
 #ifndef REWARD_MODULATION_KERNEL_CUH
 #define REWARD_MODULATION_KERNEL_CUH
 
-#include "NeuroGen/cuda/GPUNeuralStructures.h"
+#include "GPUNeuralStructures.h"
 
 // ============================================================================
 // REWARD SYSTEM CONSTANTS

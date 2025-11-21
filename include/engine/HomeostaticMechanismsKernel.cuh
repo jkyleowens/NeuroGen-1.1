@@ -1,7 +1,7 @@
 #ifndef HOMEOSTATIC_MECHANISMS_KERNEL_CUH
 #define HOMEOSTATIC_MECHANISMS_KERNEL_CUH
 
-#include <NeuroGen/cuda/GPUNeuralStructures.h>
+#include "GPUNeuralStructures.h"
 
 #include <cuda_runtime.h>
 

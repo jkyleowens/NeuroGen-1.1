@@ -4,10 +4,10 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include <NeuroGen/NetworkConfig.h>
-#include <NeuroGen/NetworkStats.h>
-#include <NeuroGen/cuda/GPUNeuralStructures.h>
-#include <NeuroGen/cuda/NetworkCUDA.cuh>
+#include "NetworkConfig.h"
+#include "NetworkStats.h"
+#include "GPUNeuralStructures.h"
+#include "NetworkCUDA.cuh"
 
 /**
  * @class NetworkCUDA_Interface

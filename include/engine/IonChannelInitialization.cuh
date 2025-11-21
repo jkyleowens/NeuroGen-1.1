@@ -1,7 +1,7 @@
 #ifndef ION_CHANNEL_INITIALIZATION_CUH
 #define ION_CHANNEL_INITIALIZATION_CUH
 
-#include <NeuroGen/cuda/GPUNeuralStructures.h>
+#include "GPUNeuralStructures.h"
 
 /**
  * @brief Initializes the ion channel states and membrane potential for all neurons.

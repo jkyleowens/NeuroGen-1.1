@@ -1,7 +1,7 @@
 #ifndef NEURON_INITIALIZATION_CUH
 #define NEURON_INITIALIZATION_CUH
 
-#include <NeuroGen/cuda/GPUNeuralStructures.h>
+#include "GPUNeuralStructures.h"
 
 /**
  * @brief Initializes the state of all neurons on the GPU.

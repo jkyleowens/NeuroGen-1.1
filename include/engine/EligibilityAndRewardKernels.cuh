@@ -3,7 +3,7 @@
 
 // >>> FIX: Added the missing include for the GPU data structures.
 // This defines GPUSynapse and GPUNeuronState, resolving the "undefined identifier" errors.
-#include <NeuroGen/cuda/GPUNeuralStructures.h>
+#include "GPUNeuralStructures.h"
 // <<< END FIX
 
 /**

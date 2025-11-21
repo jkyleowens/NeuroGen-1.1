@@ -4,7 +4,7 @@
 #ifndef LEARNING_STATE_KERNELS_CUH
 #define LEARNING_STATE_KERNELS_CUH
 
-#include "NeuroGen/cuda/GPUNeuralStructures.h"
+#include "GPUNeuralStructures.h"
 #include <cuda_runtime.h>
 #include <cstdint>
 
